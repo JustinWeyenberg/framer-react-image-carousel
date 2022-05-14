@@ -9,7 +9,6 @@ export default function App() {
       url: `https://picsum.photos/1000/500?random=${id}`
     }))
   );
-  //images.forEach((x) => (x.url = `http://picsum.photos/1000}`));
 
   return (
     <div className="App">

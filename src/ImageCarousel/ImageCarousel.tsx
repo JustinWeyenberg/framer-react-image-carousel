@@ -1,5 +1,6 @@
 import { animate, motion, useMotionValue } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "../hooks/useWindowsSize";
 
 export interface ImageCarouselImage {
   url: string;
@@ -19,6 +20,7 @@ const ImageCarousel = ({
   let selectedImage = images?.[selectedImageIndex];
   const carouselItemsRef = useRef<HTMLDivElement[] | null[]>([]);
   const x = useMotionValue(0);
+  const size = useWindowSize();
   const thumbnailWidthWithPadding = thumbnailWidth + 10;
 
   const carouselElementRef = useRef<HTMLDivElement>();
@@ -29,8 +31,7 @@ const ImageCarousel = ({
       setSelectedImageIndex(newIndex);
 
       if (carouselItemsRef?.current[newIndex]) {
-        const carouselMiddle =
-          carouselElementRef.current.clientWidth / 2 - thumbnailWidth / 2;
+        const carouselMiddle = size.width / 2 - thumbnailWidth / 2;
         const offsetLeft =
           carouselMiddle - newIndex * thumbnailWidthWithPadding;
 
@@ -38,10 +39,8 @@ const ImageCarousel = ({
         let newX = offsetLeft;
         if (newX >= 0) {
           newX = 0;
-        } else if (
-          newX <= -(carouselWidth - carouselElementRef.current.clientWidth)
-        ) {
-          newX = -(carouselWidth - carouselElementRef.current.clientWidth);
+        } else if (newX <= -(carouselWidth - size.width)) {
+          newX = -(carouselWidth - size.width);
         }
 
         animate(x, newX);
@@ -53,12 +52,25 @@ const ImageCarousel = ({
     handleSelectedImageChange(0);
   }, []);*/
 
+  // Fix for on load x.current / x.get() changes to NaN and breaks animation
+  useEffect(() => {
+    if (isNaN(x.get())) x.set(0);
+  }, [x.get()]);
+
   const [dragEnd, setDragEnd] = useState<number>();
 
-  // Handle an issue with initial load and making sure dragContraints are updated
+  // Keep dragContraints updated on load and resize (otherwise you can drag outside of bounds)
   useEffect(() => {
-    setDragEnd(-(carouselWidth - carouselElementRef?.current?.clientWidth));
-  }, [carouselWidth, carouselElementRef?.current?.clientWidth]);
+    setDragEnd(-(carouselWidth - size.width));
+    //handleSelectedImageChange(selectedImageIndex);
+  }, [carouselWidth, size.width]);
+
+  // Keep selected thumbnail centered on browser resize
+  useEffect(() => {
+    //if (isNaN(x.get())) x.set(0);
+    //setDragEnd(-(carouselWidth - size.width));
+    handleSelectedImageChange(selectedImageIndex);
+  }, [dragEnd, selectedImageIndex]);
 
   if (!selectedImage) return null;
 
@@ -78,6 +90,7 @@ const ImageCarousel = ({
       >
         <div className="carousel-images">
           <motion.div
+            key={dragEnd} // Fixes an issue where boundaries are not respected on resize
             ref={carouselElementRef}
             drag="x"
             dragConstraints={{

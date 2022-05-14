@@ -1,7 +1,7 @@
 {
-  "name": "framer-image-carousel",
+  "name": "framer-react-image-carousel",
   "version": "1.0.0",
-  "description": "",
+  "description": "A mobile and touch friendly image carousel component created in react with framer-motion",
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {

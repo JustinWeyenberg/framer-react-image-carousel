@@ -1,2 +1,3 @@
 # framer-react-image-carousel
-Created with CodeSandbox
+
+A mobile and touch friendly image carousel component created in react with framer-motion
