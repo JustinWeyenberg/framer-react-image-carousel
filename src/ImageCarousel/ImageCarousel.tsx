@@ -10,21 +10,24 @@ export interface ImageCarouselImage {
 export interface ImageCarouselProps {
   images: ImageCarouselImage[];
   thumbnailWidth?: number;
+  thumbnailPadding?: number;
 }
 
 const ImageCarousel = ({
   images,
-  thumbnailWidth = 150
+  thumbnailWidth = 150,
+  thumbnailPadding = 10
 }: ImageCarouselProps) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   let selectedImage = images?.[selectedImageIndex];
   const carouselItemsRef = useRef<HTMLDivElement[] | null[]>([]);
   const x = useMotionValue(0);
   const size = useWindowSize();
-  const thumbnailWidthWithPadding = thumbnailWidth + 10;
+  const thumbnailWidthWithPadding = thumbnailWidth + thumbnailPadding;
 
   const carouselElementRef = useRef<HTMLDivElement>();
-  const carouselWidth = images.length * thumbnailWidthWithPadding - 10;
+  const carouselWidth = images.length * thumbnailWidthWithPadding;
+  const carouselDragCorrection = 7;
 
   const handleSelectedImageChange = (newIndex: number) => {
     if (images && images.length > 0) {
@@ -33,14 +36,18 @@ const ImageCarousel = ({
       if (carouselItemsRef?.current[newIndex]) {
         const carouselMiddle = size.width / 2 - thumbnailWidth / 2;
         const offsetLeft =
-          carouselMiddle - newIndex * thumbnailWidthWithPadding;
+          carouselMiddle -
+          newIndex * thumbnailWidthWithPadding -
+          carouselDragCorrection;
 
         // We want to contain the bounds of the draggable area
         let newX = offsetLeft;
         if (newX >= 0) {
           newX = 0;
-        } else if (newX <= -(carouselWidth - size.width)) {
-          newX = -(carouselWidth - size.width);
+        } else if (
+          newX <= -(carouselWidth - size.width + carouselDragCorrection)
+        ) {
+          newX = -(carouselWidth - size.width + carouselDragCorrection);
         }
 
         animate(x, newX);
@@ -61,7 +68,7 @@ const ImageCarousel = ({
 
   // Keep dragContraints updated on load and resize (otherwise you can drag outside of bounds)
   useEffect(() => {
-    setDragEnd(-(carouselWidth - size.width));
+    setDragEnd(-(carouselWidth - size.width + carouselDragCorrection));
     //handleSelectedImageChange(selectedImageIndex);
   }, [carouselWidth, size.width]);
 
@@ -78,8 +85,9 @@ const ImageCarousel = ({
     <>
       <div className="selected-image-container">
         <img
-          //key={selectedImage.url}
+          key={selectedImage.url}
           className="selected-image"
+          s
           src={selectedImage.url}
           alt={selectedImage.altText}
         />
@@ -104,7 +112,11 @@ const ImageCarousel = ({
                 <motion.div
                   onTap={() => handleSelectedImageChange(index)}
                   key={image.url}
-                  style={{ minWidth: thumbnailWidth }}
+                  style={{
+                    minWidth: thumbnailWidth,
+                    marginRight:
+                      index === images.length - 1 ? 0 : thumbnailPadding
+                  }}
                   className={`carousel-image-container ${
                     selectedImageIndex === index
                       ? "carousel-image-selected"

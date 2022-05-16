@@ -1,11 +1,9 @@
 .selected-image-container {
   width: 100%;
-  //height: 500px;
   margin-bottom: 8px;
 }
 
 .selected-image {
-  //max-height: 500px;
   object-fit: cover;
   width: 100%;
 }
@@ -20,9 +18,9 @@
   overflow-x: hidden;
 }
 
-.carousel-image-selected {
+/*.carousel-image-selected {
   border: 3px solid var(--success) !important;
-}
+}*/
 
 .carousel-image-container {
   height: 150px;
@@ -30,9 +28,9 @@
   overflow: hidden;
 }
 
-.carousel-image-container:not(:last-child) {
+/*.carousel-image-container:not(:last-child) {
   margin-right: 10px;
-}
+}*/
 
 .carousel-image {
   height: 150px;
